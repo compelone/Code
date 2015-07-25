@@ -71,7 +71,7 @@ namespace Diligent.Teams.FileTransfer.Core
 
         public int NumberOfChunks
         {
-            get { return FileSize/ChunkSize; }
+            get { return FileSize % ChunkSize > 0 ? (FileSize/ChunkSize) + 1 : FileSize/ChunkSize ; }
         }
 
         public FileTransferStatus Status
