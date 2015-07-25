@@ -11,5 +11,6 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
         void Add(FileTransferContext fileTransferContext);
         Task Start(CancellationTokenSource cancellationTokenSource);
         void Shutdown();
+        Task<int> CalculateCrc(string path);
     }
 }

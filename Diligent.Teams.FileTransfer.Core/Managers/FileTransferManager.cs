@@ -43,6 +43,8 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
 
             if (!existing)
             {
+                CreateDirectory(fileTransferContext.ChunksPath.LocalPath);
+                CreateDirectory(fileTransferContext.StagingPath.LocalPath);
                 fileTransferContext.StatusChanged += FileTransferContextOnStatusChanged;
                 fileTransferContext.PriorityChanged += FileTransferContextOnPriorityChanged;
                 _transferFilesList.Add(fileTransferContext);
@@ -87,23 +89,37 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
             });
         }
 
-
-
         public virtual void Shutdown()
         {
             IsStarted = false;
             Console.WriteLine("Cancel was called");
         }
 
+        #region Methods
+        public virtual Task<int> CalculateCrc(string path)
+        {
+            return Task.FromResult(5);
+            //using (var filestream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            //{
+            //    var crc32 = new Crc32();
+            //    var hash = crc32.ComputeHash(filestream);
+            //    var result = BitConverter.ToInt32(hash, 0);
+
+            //    return result;
+            //}
+        }
+
+        #endregion
+
         #region Event Handlers
         protected virtual void FileTransferContextOnPriorityChanged(object sender, PriorityChangedEventArgs agrs)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected virtual void FileTransferContextOnStatusChanged(object sender, StatusChangedEventArgs agrs)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         #endregion

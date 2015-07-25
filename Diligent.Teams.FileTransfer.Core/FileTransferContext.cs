@@ -30,6 +30,7 @@ namespace Diligent.Teams.FileTransfer.Core
             ChunkSize = chunkSize;
             CanPause = true;
             CanCancel = true;
+            Chunks = new List<string>();
             Status = FileTransferStatus.Pending;
         }
 
@@ -44,6 +45,8 @@ namespace Diligent.Teams.FileTransfer.Core
         public bool CanPause { get; set; }
         public bool CanCancel { get; set; }
         public List<string> Chunks { get; set; }
+        public Uri StagingPath { get; set; }
+        public Uri ChunksPath { get; set; }
         public int ChunkSize { get; }
 
         public Uri InputFileName
@@ -55,8 +58,6 @@ namespace Diligent.Teams.FileTransfer.Core
         {
             get { return (int) _fileInfo.Length; }
         }
-
-        public Uri StagingPath { get; set; }
 
         public string FileName
         {
@@ -70,7 +71,7 @@ namespace Diligent.Teams.FileTransfer.Core
 
         public int NumberOfChunks
         {
-            get { return ChunkSize/FileSize; }
+            get { return FileSize/ChunkSize; }
         }
 
         public FileTransferStatus Status

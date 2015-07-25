@@ -12,11 +12,12 @@ namespace Diligent.Teams.FileTransfer
     class Program
     {
         private const int DefaultChunkSize = 65000;
+        static readonly Uri _inputUri = new Uri(@"c:\QA Test Data\PDF1");
+        static readonly Uri _outputUri = new Uri(@"c:\QA Test Data\PDF1\Output");
+        static readonly Uri _chunksPath = new Uri(@"c:\QA Test Data\PDF1\Chunks");
 
         static void Main(string[] args)
         {
-            Uri inputUri = new Uri(@"c:\QA Test Data\PDF");
-            Uri outputUri = new Uri(@"c:\QA Test Data\PDF\Output");
 
             var cancellationTokenSource = new CancellationTokenSource();
 
@@ -24,7 +25,7 @@ namespace Diligent.Teams.FileTransfer
             var fileTransfer = new FileTransferManager();
             fileTransfer.Start(cancellationTokenSource);
 
-            var task = BuildTransferListAsync(inputUri, outputUri, actionBlock);
+            var task = BuildTransferListAsync(_inputUri, _outputUri, actionBlock);
 
             task.Wait();
 
@@ -90,7 +91,9 @@ namespace Diligent.Teams.FileTransfer
                         DocumentContainerId = Guid.NewGuid(),
                         DocumentVersionId = Guid.NewGuid(),
                         StagingPath = outputUri,
-                        Direction = Direction.Upload
+                        Direction = Direction.Upload,
+                        ChunksPath = _chunksPath,
+                        TrackingCode = Guid.NewGuid().ToString(),
                     };
                     transferFilesList.Add(ftc);
                     await actionBlock.SendAsync($"Begin copy file {ftc.FileName}");
