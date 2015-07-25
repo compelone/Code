@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Direction.cs" />
+    <Compile Include="Events\TransfersReadyEventArgs.cs" />
     <Compile Include="FileTransferPriority.cs" />
     <Compile Include="Events\INotifyPriorityChanged.cs" />
     <Compile Include="Events\PriorityChangedEventArgs.cs" />
@@ -52,7 +53,9 @@
     <Compile Include="FileTransferContext.cs" />
     <Compile Include="FileTransferStatus.cs" />
     <Compile Include="Events\INotifyStatusChanged.cs" />
+    <Compile Include="Managers\Download.cs" />
     <Compile Include="Managers\FileTransferManager.cs" />
+    <Compile Include="Managers\HttpUpload.cs" />
     <Compile Include="Managers\ITransfer.cs" />
     <Compile Include="Managers\IFileTransferManager.cs" />
     <Compile Include="Properties\Annotations.cs" />

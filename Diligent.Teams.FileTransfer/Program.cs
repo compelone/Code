@@ -15,8 +15,8 @@ namespace Diligent.Teams.FileTransfer
 
         static void Main(string[] args)
         {
-            Uri inputUri = new Uri(@"C:\QA Test Data\PDF");
-            Uri outputUri = new Uri(@"C:\QA Test Data\PDF\Output");
+            Uri inputUri = new Uri(@"D:\QA Test Data\PDF");
+            Uri outputUri = new Uri(@"D:\QA Test Data\PDF\Output");
 
             var cancellationTokenSource = new CancellationTokenSource();
 
@@ -37,11 +37,35 @@ namespace Diligent.Teams.FileTransfer
 
             actionBlock.Completion.Wait(cancellationTokenSource.Token);
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(15000);
-                cancellationTokenSource.Cancel(false);
-            });
+            //Task.Run(async () =>
+            //{
+            //    await Task.Delay(10000);
+
+            //    for (int i = 0; i < 100; i++)
+            //    {
+            //        var files = Directory.EnumerateFiles(inputUri.LocalPath);
+            //        var sectionId = Guid.NewGuid();
+
+            //        Parallel.ForEach(files, async f =>
+            //        {
+            //            var fileInfo = new FileInfo(f);
+            //            var ftc = new FileTransferContext(fileInfo, DefaultChunkSize)
+            //            {
+            //                SectionId = sectionId,
+            //                DocumentContainerId = Guid.NewGuid(),
+            //                DocumentVersionId = Guid.NewGuid(),
+            //                StagingPath = outputUri,
+            //                Direction = Direction.Upload
+            //            };
+            //            fileTransfer.Add(ftc);
+            //            await actionBlock.SendAsync($"Begin copy file {ftc.FileName}");
+            //            File.Copy(f, Path.Combine(outputUri.LocalPath, ftc.FileName), true);
+            //            await actionBlock.SendAsync($"Completed copying file {ftc.FileName}");
+
+            //        });
+
+            //    }
+            //});
 
             Console.WriteLine("Done");
             Console.ReadLine();

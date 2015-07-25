@@ -12,11 +12,19 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
     public class FileTransferManager : IFileTransferManager
     {
         private static ConcurrentBag<FileTransferContext> _transferFilesList;
-        private readonly BufferBlock<FileTransferContext> _tranferItems; 
+        private readonly BufferBlock<FileTransferContext> _tranferItems;
+        private readonly Download _download;
+        private readonly HttpUpload _upload;
 
         public FileTransferManager()
         {
             _transferFilesList = new ConcurrentBag<FileTransferContext>();
+            _download = new Download();
+            _upload = new HttpUpload();
+
+            _download.SetTransferManager(this);
+            _upload.SetTransferManager(this);
+
             _tranferItems = new BufferBlock<FileTransferContext>(new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = 3,
@@ -28,15 +36,6 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
         public bool IsStarted { get; private set; }
 
         #endregion
-
-        public static void CreateDirectory(string localPath)
-        {
-            if (!Directory.Exists(localPath))
-            {
-                Directory.CreateDirectory(localPath);
-            }
-        }
-
 
         public virtual void Add(FileTransferContext fileTransferContext)
         {
@@ -50,11 +49,12 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
             }
         }
 
-        public  Task Start(CancellationTokenSource cancellationTokenSource)
+        public virtual Task Start(CancellationTokenSource cancellationTokenSource)
         {
             IsStarted = true;
             cancellationTokenSource.Token.Register(Shutdown);
-            return Task.Run(() =>
+
+            return Task.Run(async () =>
             {
                 while (true)
                 {
@@ -63,31 +63,59 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
                         break;
                     }
 
-                    foreach (var fileTransferContext in _transferFilesList.OrderByDescending(f => f.Priority))
+                    while (!_transferFilesList.IsEmpty)
                     {
-                        _tranferItems.Post(fileTransferContext);
-                        Console.WriteLine($"File was received {fileTransferContext.FileName}");
-                        Console.WriteLine($"Total items in buffer are {_tranferItems.Count}");
+                        FileTransferContext availableItem;
+                        
+                        _transferFilesList.TryTake(out availableItem);
+
+                        if (availableItem != null)
+                        {
+                            _tranferItems.Post(availableItem);
+                            Console.WriteLine($"File was received {availableItem.FileName}");
+                            Console.WriteLine($"Total items in buffer are {_tranferItems.Count}");
+                            Console.WriteLine($"Total items in bag are {_transferFilesList.Count}");
+
+                            _tranferItems.LinkTo(_upload.Handle());
+                        }
                     }
+                    
+                    // Asynchronous delay to prevent us from
+                    // spinning through the while loop when there is no
+                    // work.
+                    await Task.Delay(2000);
                 }
             });
         }
 
-        public void Shutdown()
+
+
+        public virtual void Shutdown()
         {
             IsStarted = false;
             Console.WriteLine("Cancel was called");
         }
 
         #region Event Handlers
-        private void FileTransferContextOnPriorityChanged(object sender, PriorityChangedEventArgs agrs)
+        protected virtual void FileTransferContextOnPriorityChanged(object sender, PriorityChangedEventArgs agrs)
         {
             throw new NotImplementedException();
         }
 
-        private void FileTransferContextOnStatusChanged(object sender, StatusChangedEventArgs agrs)
+        protected virtual void FileTransferContextOnStatusChanged(object sender, StatusChangedEventArgs agrs)
         {
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Helpers
+        public static void CreateDirectory(string localPath)
+        {
+            if (!Directory.Exists(localPath))
+            {
+                Directory.CreateDirectory(localPath);
+            }
         }
 
         #endregion
