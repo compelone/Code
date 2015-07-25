@@ -53,6 +53,7 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
         {
             IsStarted = true;
             cancellationTokenSource.Token.Register(Shutdown);
+            _tranferItems.LinkTo(_upload.Handle(), f => f.Direction == Direction.Upload);
 
             return Task.Run(async () =>
             {
@@ -75,8 +76,6 @@ namespace Diligent.Teams.FileTransfer.Core.Managers
                             Console.WriteLine($"File was received {availableItem.FileName}");
                             Console.WriteLine($"Total items in buffer are {_tranferItems.Count}");
                             Console.WriteLine($"Total items in bag are {_transferFilesList.Count}");
-
-                            _tranferItems.LinkTo(_upload.Handle());
                         }
                     }
                     

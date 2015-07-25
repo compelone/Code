@@ -15,8 +15,8 @@ namespace Diligent.Teams.FileTransfer
 
         static void Main(string[] args)
         {
-            Uri inputUri = new Uri(@"D:\QA Test Data\PDF");
-            Uri outputUri = new Uri(@"D:\QA Test Data\PDF\Output");
+            Uri inputUri = new Uri(@"c:\QA Test Data\PDF");
+            Uri outputUri = new Uri(@"c:\QA Test Data\PDF\Output");
 
             var cancellationTokenSource = new CancellationTokenSource();
 
@@ -76,14 +76,14 @@ namespace Diligent.Teams.FileTransfer
             FileTransferManager.CreateDirectory(outputUri.LocalPath);
             List<FileTransferContext> transferFilesList = new List<FileTransferContext>();
 
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 var files = Directory.EnumerateFiles(inputUri.LocalPath);
                 var sectionId = Guid.NewGuid();
 
-                Parallel.ForEach(files, async f =>
+                foreach (var file in files)
                 {
-                    var fileInfo = new FileInfo(f);
+                    var fileInfo = new FileInfo(file);
                     var ftc = new FileTransferContext(fileInfo, DefaultChunkSize)
                     {
                         SectionId = sectionId,
@@ -94,10 +94,9 @@ namespace Diligent.Teams.FileTransfer
                     };
                     transferFilesList.Add(ftc);
                     await actionBlock.SendAsync($"Begin copy file {ftc.FileName}");
-                    File.Copy(f, Path.Combine(outputUri.LocalPath, ftc.FileName), true);
+                    File.Copy(file, Path.Combine(outputUri.LocalPath, ftc.FileName), true);
                     await actionBlock.SendAsync($"Completed copying file {ftc.FileName}");
-
-                });
+                }
 
                 actionBlock.Complete();
                 return transferFilesList;
