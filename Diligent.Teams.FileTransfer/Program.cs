@@ -12,9 +12,13 @@ namespace Diligent.Teams.FileTransfer
     class Program
     {
         private const int DefaultChunkSize = 65000;
-        static readonly Uri _inputUri = new Uri(@"c:\QA Test Data\PDF1");
-        static readonly Uri _outputUri = new Uri(@"c:\QA Test Data\PDF1\Output");
-        static readonly Uri _chunksPath = new Uri(@"c:\QA Test Data\PDF1\Chunks");
+        static readonly Uri _inputUri = new Uri(@"d:\QA Test Data\PDF");
+        static readonly Uri _outputUri = new Uri(@"d:\QA Test Data\PDF\Output");
+        static readonly Uri _chunksPath = new Uri(@"d:\QA Test Data\PDF\Chunks");
+
+        static readonly Uri _inputUri2 = new Uri(@"d:\QA Test Data\Excel");
+        static readonly Uri _outputUri2 = new Uri(@"d:\QA Test Data\Excel\Output");
+        static readonly Uri _chunksPath2 = new Uri(@"d:\QA Test Data\Excel\Chunks");
 
         static void Main(string[] args)
         {
@@ -38,35 +42,36 @@ namespace Diligent.Teams.FileTransfer
 
             actionBlock.Completion.Wait(cancellationTokenSource.Token);
 
-            //Task.Run(async () =>
-            //{
-            //    await Task.Delay(10000);
+            Task.Run(async () =>
+            {
+                await Task.Delay(30000);
 
-            //    for (int i = 0; i < 100; i++)
-            //    {
-            //        var files = Directory.EnumerateFiles(inputUri.LocalPath);
-            //        var sectionId = Guid.NewGuid();
+                for (int i = 0; i < 100; i++)
+                {
+                    var files = Directory.EnumerateFiles(_inputUri2.LocalPath);
+                    var sectionId = Guid.NewGuid();
 
-            //        Parallel.ForEach(files, async f =>
-            //        {
-            //            var fileInfo = new FileInfo(f);
-            //            var ftc = new FileTransferContext(fileInfo, DefaultChunkSize)
-            //            {
-            //                SectionId = sectionId,
-            //                DocumentContainerId = Guid.NewGuid(),
-            //                DocumentVersionId = Guid.NewGuid(),
-            //                StagingPath = outputUri,
-            //                Direction = Direction.Upload
-            //            };
-            //            fileTransfer.Add(ftc);
-            //            await actionBlock.SendAsync($"Begin copy file {ftc.FileName}");
-            //            File.Copy(f, Path.Combine(outputUri.LocalPath, ftc.FileName), true);
-            //            await actionBlock.SendAsync($"Completed copying file {ftc.FileName}");
 
-            //        });
-
-            //    }
-            //});
+                    foreach (var file in files)
+                    {
+                        var fileInfo = new FileInfo(file);
+                        var ftc = new FileTransferContext(fileInfo, DefaultChunkSize)
+                        {
+                            SectionId = sectionId,
+                            DocumentContainerId = Guid.NewGuid(),
+                            DocumentVersionId = Guid.NewGuid(),
+                            StagingPath = _outputUri2,
+                            Direction = Direction.Upload,
+                            ChunksPath = _chunksPath2,
+                            TrackingCode = Guid.NewGuid().ToString(),
+                        };
+                        fileTransfer.Add(ftc);
+                        await actionBlock.SendAsync($"Begin copy file {ftc.FileName}");
+                        File.Copy(file, Path.Combine(_outputUri2.LocalPath, ftc.FileName), true);
+                        await actionBlock.SendAsync($"Completed copying file {ftc.FileName}");
+                    }
+                }
+            });
 
             Console.WriteLine("Done");
             Console.ReadLine();
